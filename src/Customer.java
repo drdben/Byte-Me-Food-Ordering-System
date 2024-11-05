@@ -111,7 +111,7 @@ public class Customer extends Account{
         displayCart();
     }
 
-    public void checkout(Admin admin){
+    public void checkout(Admin admin, String req){
         System.out.println("Default delivery address is "+Address+"\nTo change delivery details press 1: ");
         String s =sc.next();
         if(s.equals("1")){
@@ -123,7 +123,7 @@ public class Customer extends Account{
         System.out.println("Redirecting you to Payment Page...");
         makepayment(cartTotal, admin);
         //place order:
-        Order order = new Order(Cart, isVIP(), this);
+        Order order = new Order(Cart, isVIP(), this, req);
         pending.add(order);
         Cart.clear();
         System.out.println("Congratulations! Order has been placed with Order ID"+order.getId());
@@ -193,10 +193,9 @@ public class Customer extends Account{
                         }
                     }
                 }
-                Order o2 = new Order(cart2, isVIP(), this);
-                pending.add(o2);
-                checkout(admin);
-                System.out.println("New order placed successfully with order ID: "+o2.getId());
+                this.Cart=cart2;
+                checkout(admin,"");
+                System.out.println("New order placed successfully");
             }
             System.out.println("-----------------------------");
         }

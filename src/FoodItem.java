@@ -42,12 +42,14 @@ public class FoodItem {
 
     public void ViewMenu(){
         System.out.println("----------------Menu----------------");
+        int i=0;
         for (FoodItem food : Menu) {
+            i++;
             String av ="Available";
             if(!food.available) {
                 av = "Not available atm.";
             }
-            System.out.println("   " + food.item + " : " + food.price+" ("+av+")");
+            System.out.println(i+".   " + food.item + " : " + food.price+" ("+av+")");
         }
         ;
         System.out.println("------------------------------------");
@@ -184,6 +186,14 @@ public class FoodItem {
 
     public String getItem() {
         return item;
+    }
+
+    public void setPrice(Float price) {
+        this.price = price;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 
     public boolean isAvailable() {

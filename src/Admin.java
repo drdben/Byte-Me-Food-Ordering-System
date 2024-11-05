@@ -1,4 +1,7 @@
+import java.util.Scanner;
+
 public class Admin extends Account {
+    Scanner sc = new Scanner(System.in);
     private String pass = "webroke";
     public Account<Customer> adminAcc = new Account();
 
@@ -11,6 +14,11 @@ public class Admin extends Account {
         return "Admin Crazy Canteen";
     }
 
+    public void addItem(FoodItem f0){
+        System.out.println("Enter Item Name");
+        String item = sc.nextLine();
+        System.out.println();
+    }
     public void processrefund(float amount, Customer c){
 
     }

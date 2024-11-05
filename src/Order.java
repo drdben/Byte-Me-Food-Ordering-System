@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Order {
 
-    private int status; //0 means received, 1 preparing, 2 is outfordel, 3 complete, denied
+    private int status; //0 means received, 1 preparing, 2 is outfordel, 3 complete, 4-denied
     private boolean VIP = false;
     private Customer customer;
     private Date date;
@@ -11,6 +11,7 @@ public class Order {
     private int id =0;
     //food item and specified qty
     private static int count =0;
+    private String specialreq = "";
 
 
     static Queue<Order> vipqueue = new LinkedList<>();
@@ -22,7 +23,7 @@ public class Order {
     static Stack<Order> OrderHistory = new Stack<>();
     //only completed orders are added to the orderhistory stack
 
-    public Order(HashMap<FoodItem, Integer> Cart, boolean vip, Customer c){
+    public Order(HashMap<FoodItem, Integer> Cart, boolean vip, Customer c, String req){
         this.cart = Cart;
         this.VIP = vip;
         if(vip){
@@ -38,6 +39,7 @@ public class Order {
         }
         this.customer = c;
         this.id=++count;
+        this.specialreq= req;
     }
 
     public void ViewOrders(){
@@ -63,7 +65,15 @@ public class Order {
         return status;
     }
 
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     public int getId() {
         return id;
+    }
+
+    public String getSpecialreq() {
+        return specialreq;
     }
 }
