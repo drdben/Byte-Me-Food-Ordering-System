@@ -1,6 +1,6 @@
-Thank you for providing the additional files. I've reviewed the code and project structure, and I'm ready to generate the README content for you. Here's a proposed README:
+# Assignment 3
 
-# Crazy Canteen
+- - Divyanshi, 2023209
 
 Crazy Canteen is a Java application that simulates a food ordering and management system for a college canteen. It allows customers to browse the menu, place orders, track their order status, and view their order history. Administrators can manage the menu, process orders, and generate daily reports.
 
