@@ -1,8 +1,9 @@
 import java.awt.*;
+import java.io.Serializable;
 import java.util.*;
 
-public class Customer extends Account{
-    Scanner sc = new Scanner(System.in);
+public class Customer extends Account implements Serializable {
+    private transient Scanner sc = new Scanner(System.in);
     private ArrayList<Order> history = new ArrayList<>();
     private ArrayList<Order> pending = new ArrayList<>();
 
@@ -50,6 +51,8 @@ public class Customer extends Account{
         else{
             System.out.println("Insufficient funds in canteen wallet, auto redirecting to Bank...\nEnter Bank authentication pin (no spaces) to complete payment of "+amount+"$");
             String pin = sc.next();
+            sc.nextLine();
+
         }
         System.out.println("Congratulations! Payment Verified!"); //we accept all sort of pins :) lol
         System.out.println("Remaining Balance in Canteen account is: "+account.getBalance()+" $\nThank you for your purchase!!!");
@@ -60,6 +63,8 @@ public class Customer extends Account{
         admin.adminAcc.getCredit().add(amount);
         System.out.println("Press any key to return to previous page");
         String s = sc.next();
+        sc.nextLine();
+
     }
 
     public boolean isVIP() {
@@ -99,6 +104,7 @@ public class Customer extends Account{
         String change = sc.nextLine();
         System.out.println("Enter New Quantity: ");
         int qty = sc.nextInt();
+        sc.nextLine();
         for(FoodItem f: Cart.keySet()){
             String it = f.getItem().toLowerCase();
             if(change.equals(it)){
@@ -114,6 +120,8 @@ public class Customer extends Account{
     public void checkout(Admin admin, String req){
         System.out.println("Default delivery address is "+Address+"\nTo change delivery details press 1: ");
         String s =sc.next();
+        sc.nextLine();
+
         if(s.equals("1")){
             System.out.println("Enter new address: ");
             String ss = sc.nextLine();
@@ -124,6 +132,7 @@ public class Customer extends Account{
         makepayment(cartTotal, admin);
         //place order:
         Order order = new Order(Cart, isVIP(), this, req);
+//        fileHandler.writeAllOrders("orders.dat",Order.vipqueue, Order.regular);
         pending.add(order);
         Cart.clear();
         System.out.println("Congratulations! Order has been placed with Order ID"+order.getId());
@@ -179,9 +188,13 @@ public class Customer extends Account{
             };
             System.out.println("Would you like to Re-place any of the above orders?(1=yes)");
             int yes = sc.nextInt();
+            sc.nextLine();
+
             if(yes==1){
                 System.out.println("Please enter order ID to replace");
                 int id = sc.nextInt();
+                sc.nextLine();
+
                 HashMap<FoodItem,Integer> cart2 = new HashMap<>();
                 for(Order order: history){
                     if(order.getId()==id){
@@ -203,15 +216,21 @@ public class Customer extends Account{
 
     public void AddToCart(FoodItem food){
         System.out.println("How many different items do you want to add?");
+        if(sc==null){
+            this.sc = new Scanner(System.in);
+        }
         int diff = sc.nextInt();
+        sc.nextLine();
         System.out.println("For each item, write the item name press enter and write quantity press enter");
         for(int i=0;i<diff;i++){
             System.out.println(i+":" );
-            String name = sc.nextLine();
+            String n = sc.nextLine();
+            String name = n.toLowerCase();
             int qty = sc.nextInt();
+            sc.nextLine();
             boolean found=false;
             for(FoodItem f: food.Menu){
-                if(f.getItem().equals(name)){
+                if(f.getItem().toLowerCase().equals(name)){
                     Cart.put(f, qty);
                     found = true;
                     System.out.println(qty+" Item(s) "+f+"Added!");
@@ -222,6 +241,17 @@ public class Customer extends Account{
                 System.out.println("Sorry, couldnt add that something went wrong, non existent item maybe lol");
             }
         }
+    }
+
+    public void AddToCartInternal(FoodItem food, int qty){
+            boolean found=false;
+            for(FoodItem f: food.Menu){
+                if(f.getItem().equals(food.getItem())){
+                    Cart.put(f, qty);
+                    found = true;
+                    break;
+                }
+            }
     }
 
     public String getID() {
@@ -240,4 +270,11 @@ public class Customer extends Account{
         return Address;
     }
 
+    public HashMap<FoodItem, Integer> getCart() {
+        return Cart;
+    }
+
+    public Account<Admin> getAccount() {
+        return account;
+    }
 }

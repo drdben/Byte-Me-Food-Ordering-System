@@ -1,6 +1,10 @@
+import javax.swing.*;
+import java.awt.*;
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.*;
 
-public class Main {
+public class Main{
     public static FoodItem i0;
 
     static {
@@ -16,22 +20,26 @@ public class Main {
 
     public static void main(String[] args) throws WrongFoodTypeException, WrongpwException {
         InitMenu();
-        InitCustomer();
         Admin admin = new Admin();
+        InitCustomer(admin);
         LoginPage(admin);
     }
 
     public static void LoginPage(Admin admin) {
         Scanner sc = new Scanner(System.in);
+//        Customer.customers = fileHandler.readCustomersFromFile();
         boolean exit = false;
         while(!exit){
-            System.out.println("1. Admin Login\n2. Customer Login\n3. Exit\nEnter choice no: ");
+            System.out.println("1. Admin Login\n2. Customer Login\n3. Exit\n4. GUI\nEnter choice no: ");
             int ch = sc.nextInt();
+            sc.nextLine();
+
             switch(ch){
                 case 1:
                     try{
                         System.out.println("Enter Admin Password: ");
                         String pass = sc.next();
+                        sc.nextLine();
                         if(pass.equals(admin.getPass())) {
                             System.out.println("--------Login successful!----");
                             AdminMain();
@@ -44,6 +52,7 @@ public class Main {
                         System.out.println(w.getMessage());
                         System.out.println("Enter Admin Password: ");
                         String pass = sc.next();
+                        sc.nextLine();
                         if(pass.equals(admin.getPass())) {
                             System.out.println("--------Login successful!----");
                             AdminMain();
@@ -55,6 +64,7 @@ public class Main {
                     ArrayList<Customer> custs = Customer.customers;
                     System.out.println("Enter Customer ID (your name if youre new, no spaces): ");
                     String id = sc.next();
+                    sc.nextLine();
                     boolean found =false;
                     for(Customer c: custs){
                         if((c.getID()).equals(id)){
@@ -66,8 +76,12 @@ public class Main {
                     if(!found){
                         System.out.println("Enter Address/Room no (no spaces): ");
                         String add = sc.next();
+                        sc.nextLine();
+
                         System.out.println("Would you like to be a VIP customer? (Monthly payment of $20) (1 if yes, 0 if no) ");
                         int in = sc.nextInt();
+                        sc.nextLine();
+
                         boolean vip=false;
                         if(in==1){
                             vip = true;
@@ -82,10 +96,18 @@ public class Main {
                             CustomerMain(c1, admin);
                         }
                     }
+//                    fileHandler.writeAllCustomers(custs);
                     break;
                 case 3:
                     System.out.println("Sad to see you leaaveeeee :/");
                     exit = true;
+                    break;
+                case 4:
+//                    fileHandler.writeAllOrders("orders.dat",Order.vipqueue,Order.regular);
+                    SwingUtilities.invokeLater(() -> {
+                        MenuGUI gui = new MenuGUI();
+                        gui.setVisible(true);
+                    });
                     break;
                 default:
                     break;
@@ -107,6 +129,7 @@ public class Main {
         while(!logout) {
             System.out.println("What would you like to do today:\n1. Add Items in Menu\n2. Update Existing Items\n3. Remove Items\n4. View Pending Orders\n5. Handle Orders(Manage status etc) \n6. Generate Daily Report\n7. Log Out");
             int mc=sc.nextInt();
+            sc.nextLine();
             switch(mc) {
                 case 1:
                     System.out.println("enter food :");
@@ -117,8 +140,10 @@ public class Main {
                 case 2:
                     System.out.println("Enter Item serial number to update: ");
                     int sn = sc.nextInt();
+                    sc.nextLine();
                     System.out.println("Enter Updated price press enter(same price if unchanged) ");
                     float qt = sc.nextInt();
+                    sc.nextLine();
                     System.out.println("Enter Updated Availability (1 if available, 0 if not) ");
                     arr.get(sn).setPrice(qt);
                     if(qt==1){
@@ -134,9 +159,7 @@ public class Main {
                 case 3:
                     System.out.println("Enter Item serial number to remove: ");
                     int rm = sc.nextInt();
-                    String item = sc.next();
-                    FoodItem f = arr.get(rm);
-                    arr.get(rm).removeitem();
+                    FoodItem f = FoodItem.removeitem(rm-1);
                     //update all *pending* orders with declined status(already processing orders will not be declined)
                     for(Order o: vip){
                         if(o.getCart().containsKey(f)){
@@ -150,48 +173,38 @@ public class Main {
                     }
                     break;
                 case 4:
-                    System.out.println("Pending Orders in order of Priority are as follows:(IDs only) (Declined orders are not printed) ");
-                    System.out.println("VIP Queue:");
-                    for(Order o: vip){
-                        if(o.getStatus()!=4){
-                            System.out.println(o.getId());
-                        }
-                    }
-                    System.out.println("Regular Queue:");
-                    for(Order o: reg){
-                        if(o.getStatus()!=4){
-                            System.out.println(o.getId());
-                        }
-                    }
+                    Order.ViewOrders();
                     break;
                 case 5:
                     //handling orders
-                    System.out.println("Printing Next order to be handled..");
-                    Order next;
-                    if(!vip.isEmpty()){
-                        HashMap<FoodItem, Integer> car = vip.peek().getCart();
-                        next = vip.peek();
-                        for(FoodItem fo: car.keySet()){
-                            System.out.println(fo.getItem()+" : "+car.get(fo));
-                        }
-                        System.out.println("Special requests: ");
-                        System.out.println(vip.peek().getSpecialreq());
+                    System.out.println("Would you like to: ");
+                    System.out.println("1. Begin Processing an Order\n2. Send processed Order to Delivery \n3. Complete Out For Delivery Orders\n4. Back");
+                    int choice = sc.nextInt();
+                    switch(choice){
+                        case 1:
+                            Order.processOrder();
+                            break;
+                        case 2:
+                            Order.deliver();
+                            break;
+                        case 3:
+                            Order.complete();
+                            break;
+                        default:
+                            System.out.println("Invalid input");
+                            break;
                     }
-                    else{
-                        HashMap<FoodItem, Integer> car = reg.peek().getCart();
-                        next = reg.peek();
-                        for(FoodItem fo: car.keySet()){
-                            System.out.println(fo.getItem()+" : "+car.get(fo));
-                        }
-                        System.out.println("Special requests: ");
-                        System.out.println(vip.peek().getSpecialreq());
-                    }
-                    System.out.println("Enter 1 to update status to Processing: (any other key to continue as is)");
-                    int ch = sc.nextInt();
-                    if(ch==1){
-                        next.setStatus(1);
-                    }
-
+                    break;
+                case 6:
+                    Order.generatedailyreport();
+                    break;
+                case 7:
+//                    MenuGUI.
+                    logout=true;
+                    break;
+                default:
+                    System.out.println("Invalid Input");
+                    break;
             }
         }
     }
@@ -203,20 +216,24 @@ public class Main {
         while(!logout){
             System.out.println("What would you like to do today:\n1. Browse Menu\n2. Cart & Checkout\n3. Track & Cancel Orders\n4. View Order History\n5. Leave a Review\n6. Log out");
             int mc=sc.nextInt();
+            sc.nextLine();
+
             switch(mc){
                 case 1:
                     boolean rtom = false;
                     while(!rtom){
-                        System.out.println("Do you want to..\n1. View Full Menu\n2. Search by Keyword\n3. View Breakfast Options\n4. View Chinese Options\n5. View Momos\n6. Sort by Price\n7.Add to cart\n8.Return to Main menu (enter int 1-8)");
+                        System.out.println("Do you want to..\n1. View Full Menu\n2. Search by Keyword\n3. View Breakfast Options\n4. View Chinese Options\n5. View Momos\n6. Sort by Price\n7.Add to cart\n8. Return to Main menu (enter int 1-8)");
                         int mch = sc.nextInt();
+                        sc.nextLine();
                         switch (mch){
                             case 1:
                                 i0.ViewMenu();
                                 break;
                             case 2:
                                 System.out.println("-------This is the Search Bar-------");
-                                System.out.println("Enter Keyword(s)");
+                                System.out.println("Enter Keyword(s): ");
                                 String s = sc.nextLine();
+//                                sc.nextLine();
                                 String ss = s.toLowerCase();
                                 i0.search(ss);
                                 break;
@@ -234,6 +251,8 @@ public class Main {
                                 while(!back){
                                     System.out.println("Would you like to:\n1. Sort in Ascending order\n2. Sort in Descending order\n3. Go Back");
                                     int ord = sc.nextInt();
+                                    sc.nextLine();
+
                                     switch (ord){
                                         case 1:
                                             i0.sortbyprice(true);
@@ -265,6 +284,8 @@ public class Main {
                         while(!exitcart){
                             System.out.println("1. Remove Item\n2. Change Quantity of an item\n3. Proceed to Checkout\n4. Exit Cart");
                             int ch = sc.nextInt();
+                            sc.nextLine();
+
                             switch (ch){
                                 case 1:
                                     c.removefromcart();
@@ -278,10 +299,13 @@ public class Main {
                                     System.out.println("Request recieved!");
                                     System.out.println("Are you sure? You will have to complete order once you confirm.\nTo confirm press 1.");
                                     String s = sc.next();
+                                    sc.nextLine();
+
                                     if(s.equals("1")){
                                         System.out.println("Proceeding to Checkout...");
                                         c.checkout(admin, req);
                                     }
+//                                    fileHandler.writeAllOrders("orders.dat",Order.vipqueue,Order.regular);
                                     break;
                                 case 4:
                                     exitcart = true;
@@ -293,6 +317,8 @@ public class Main {
                 case 3:
                     System.out.println("Enabling Order Tracking...");
                     c.displayPending();
+//                    fileHandler.writeAllOrders("orders.dat",Order.vipqueue,Order.regular);
+
                     break;
                 case 4:
                     System.out.println("Loading Order History for complete orders: ");
@@ -303,6 +329,9 @@ public class Main {
                     //Reviews are anonymous!
                     break;
                 case 6:
+//                    fileHandler.writeAllOrders("orders.dat",Order.vipqueue,Order.regular);
+//                    OrdersGUI.refreshOrders();
+//                    fileHandler.writeAllCustomers(Customer.customers);
                     logout=true;
                     break;
                 default:
@@ -324,7 +353,9 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         String i = sc.nextLine();
         int p = sc.nextInt();
+        sc.nextLine();
         int t = sc.nextInt();
+        sc.nextLine();
         try{
             FoodItem f4 = new FoodItem(i,p,t);
             System.out.println(i+" Added!\n");
@@ -336,7 +367,35 @@ public class Main {
 //        sc.close();
     }
 
-    public static void InitCustomer() {
+    public static void InitCustomer(Admin admin) {
+        //john is a regular customer who has placed an order and has some things in his cart
+        Customer John = new Customer("john", "505 boys hostel",false);
+        John.AddToCartInternal(i0,5);
+        float amount = i0.getPrice()*5;
+        Order j1 = new Order(John.getCart(),false, John);
+        John.getAccount().getFrom().add(admin);
+        John.getAccount().getCredit().add(-amount);
+        admin.adminAcc.changebalance(amount);
+        admin.adminAcc.getFrom().add(John);
+        admin.adminAcc.getCredit().add(amount);
+
+        John.getCart().clear();
+        John.AddToCartInternal(i0.Menu.get(1),3);
+
+        //emma is a vip customer who has placed an order currently empty cart
+        Customer emma = new Customer("emma", "505 gh",true);
+        emma.AddToCartInternal(i0.Menu.get(3),2);
+        amount = FoodItem.Menu.get(3).getPrice()*2;
+        Order e1 = new Order(emma.getCart(),true, emma);
+        emma.getAccount().getFrom().add(admin);
+        emma.getAccount().getCredit().add(-amount);
+        admin.adminAcc.changebalance(amount);
+        admin.adminAcc.getFrom().add(emma);
+        admin.adminAcc.getCredit().add(amount);
+
+        //harry regular, only items in cart no prev orders
+        Customer harry = new Customer("harry", "ur place", false);
+        harry.AddToCartInternal(i0.Menu.get(2),1);
 
     }
 }

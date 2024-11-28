@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Scanner;
 
-public class Admin extends Account {
-    Scanner sc = new Scanner(System.in);
+public class Admin extends Account implements Serializable {
+    transient Scanner sc = new Scanner(System.in);
     private String pass = "webroke";
     public Account<Customer> adminAcc = new Account();
 
@@ -19,6 +20,8 @@ public class Admin extends Account {
         String item = sc.nextLine();
         System.out.println();
     }
+
+
     public void processrefund(float amount, Customer c){
 
     }

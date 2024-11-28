@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.SequencedSet;
 
-public class Account<T> {
+public class Account<T> implements Serializable {
     private float balance;
     private ArrayList<Float> credit = new ArrayList<>();
     private ArrayList<T> from = new ArrayList<>();

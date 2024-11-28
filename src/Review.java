@@ -1,4 +1,6 @@
-public class Review {
+import java.io.Serializable;
+
+public class Review implements Serializable {
     private int score;
     private String comment;
 

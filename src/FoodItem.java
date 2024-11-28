@@ -1,12 +1,14 @@
 import javax.annotation.processing.SupportedSourceVersion;
+import java.io.Serializable;
 import java.util.*;
 
-public class FoodItem {
-    Scanner sc = new Scanner(System.in);
+public class FoodItem implements Serializable {
+    private transient Scanner sc = new Scanner(System.in);
     private String item;
     private Float price;
     private boolean available=true;
     private ArrayList<Review> reviews = new ArrayList<>();
+    private int type;
 
     public static ArrayList<FoodItem> Menu = new ArrayList<>();
     private static ArrayList<FoodItem> Breakfast = new ArrayList<>();
@@ -22,12 +24,15 @@ public class FoodItem {
         }
         switch(type){
             case 1:
+                this.type=1;
                 Breakfast.add(this);
                 break;
             case 2:
+                this.type=2;
                 Chinese.add(this);
                 break;
             case 3:
+                this.type=3;
                 Momos.add(this);
                 break;
             default:
@@ -63,7 +68,7 @@ public class FoodItem {
             if(!f.available) {
                 av = "Not available atm.";
             }
-            String it = item.toLowerCase();
+            String it = f.getItem().toLowerCase();
             boolean yes = false;
             if(it.equals(p)){
                 yes = true;
@@ -133,20 +138,12 @@ public class FoodItem {
         }
     }
 
-    public void removeitem(){
-        System.out.println("Enter name of item to be removed.");
-        String rem = sc.nextLine();
+    public static FoodItem removeitem(int index){
         boolean rm =false;
-            for(FoodItem e: Menu){
-                if((e.item).equals(rem)) {
-                    Menu.remove(e);
-                    rm = true;
-                    break;
-                }
-            };
-            if(rm){
-                System.out.println("Item does not exist!");
-            }
+        FoodItem f = Menu.get(index);
+        Menu.remove(index);
+        System.out.println("Removed "+f+" from Menu");
+        return f;
     }
 
     public void addReview(){
@@ -154,6 +151,7 @@ public class FoodItem {
         int score=0;
         try{
             score = sc.nextInt();
+            sc.nextLine();
             if(score>5 || score<0){
                 throw new InputOutofBoundsException("Please enter rating ranging from 0 to 5 only!");
             }
@@ -198,5 +196,9 @@ public class FoodItem {
 
     public boolean isAvailable() {
         return available;
+    }
+
+    public int getType() {
+        return type;
     }
 }
