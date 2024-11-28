@@ -4,6 +4,7 @@ import java.util.Queue;
 
 public class fileHandler {
     public static String filePath="src/customerFiles/";
+
 //    public static void writeAllCustomers(ArrayList<Customer> customers){
 //        try (ObjectOutputStream oo = new ObjectOutputStream(new FileOutputStream(filePath + "customers.dat"))) {
 //            oo.writeObject(customers);
@@ -31,14 +32,23 @@ public class fileHandler {
 //        return new ArrayList<>();
 //    }
 
-    public static void writeAllOrders(String file, Queue<Order> vip, Queue<Order> regular){
+    public static void saveOrderManager(String file, OrderManager manager){
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath+file))) {
-//            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath+file));
-            oos.writeObject(vip);
-            oos.writeObject(regular);
+            oos.writeObject(manager);
             System.out.println("Order history written to file successfully.");
         } catch (IOException e) {
             System.out.println("Error writing order history to file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static OrderManager loadOrderManager(String file) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath + file))) {
+            return (OrderManager) ois.readObject();
+        }
+        catch(IOException | ClassNotFoundException e){
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -65,7 +75,7 @@ public class fileHandler {
         }
     }
 
-    public static void addItem(int orderid,String name,int quantity) {
+    public static void addItem(int orderid, String name, int quantity) {
         try (FileOutputStream fos = new FileOutputStream(filePath+"currentCart.csv", true)) { // true = append mode
             String orderData = orderid + "," + name+","+quantity + "\n";
             fos.write(orderData.getBytes());

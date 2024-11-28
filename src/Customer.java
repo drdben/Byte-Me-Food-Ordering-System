@@ -22,10 +22,11 @@ public class Customer extends Account implements Serializable {
         return ID;
     }
 
-    public Customer(String id, String address, boolean vip){
+    public Customer(String id, String address, boolean vip, OrderManager manager){
         this.ID = id;
         this.Address = address;
         customers.add(this);
+        manager.addtocusts(this);
         this.VIP = vip;
     }
 
@@ -187,6 +188,9 @@ public class Customer extends Account implements Serializable {
                 System.out.println("You paid $"+o.getTotal());
             };
             System.out.println("Would you like to Re-place any of the above orders?(1=yes)");
+            if(sc==null){
+                sc = new Scanner(System.in);
+            }
             int yes = sc.nextInt();
             sc.nextLine();
 
@@ -238,7 +242,7 @@ public class Customer extends Account implements Serializable {
                 }
             }
             if(!found){
-                System.out.println("Sorry, couldnt add that something went wrong, non existent item maybe lol");
+                System.out.println("Sorry, couldn't add that something went wrong, non existent item maybe lol");
             }
         }
     }

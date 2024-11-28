@@ -1,7 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
-import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main{
@@ -15,17 +12,40 @@ public class Main{
         }
     }
 
-    public Main() {
-    }
-
     public static void main(String[] args) throws WrongFoodTypeException, WrongpwException {
         InitMenu();
         Admin admin = new Admin();
-        InitCustomer(admin);
-        LoginPage(admin);
+        OrderManager manager = null;
+        try {
+            manager = fileHandler.loadOrderManager("orders.dat");
+        } catch(Exception e){
+            System.out.println("Error loading orders.dat or file does not exist. Initializing new data.");
+        }
+        if(manager!=null){
+            Order.vipqueue.addAll(manager.getVipQueue());
+            Order.regular.addAll(manager.getRegularQueue());
+            Order.OrderHistory.addAll(manager.getOrderHistory());
+            Order.preparing.addAll(manager.getPreparing());
+            Order.outfordelivery.addAll(manager.getOutfordelivery());
+            Order.denied.addAll(manager.getDenied());
+            Customer.customers.addAll(manager.getCusts());
+            Order.count = manager.getCnt();
+        }
+        else{
+            manager = new OrderManager();
+            try{
+                fileHandler.saveOrderManager("orders.dat", manager);
+                System.out.println("Created new orders.dat file");
+            }
+            catch(Exception e){
+                System.out.println("couldnt create new orders.dat: "+e.getMessage());
+            }
+            InitCustomer(admin, manager);
+        }
+        LoginPage(admin, manager);
     }
 
-    public static void LoginPage(Admin admin) {
+    public static void LoginPage(Admin admin, OrderManager manager) {
         Scanner sc = new Scanner(System.in);
 //        Customer.customers = fileHandler.readCustomersFromFile();
         boolean exit = false;
@@ -85,27 +105,39 @@ public class Main{
                         boolean vip=false;
                         if(in==1){
                             vip = true;
-                            Customer c1 = new Customer(id, add,vip);
+                            Customer c1 = new Customer(id, add,vip, manager);
                             System.out.println("Redirecting you to Payment Page...");
                             c1.makepayment(20f, admin);
                             System.out.println("Congratulations! You are now a VIP customer and will get order priority.");
                             CustomerMain(c1, admin);
                         }
                         else{
-                            Customer c1 = new Customer(id, add, vip);
+                            Customer c1 = new Customer(id, add, vip, manager);
                             CustomerMain(c1, admin);
                         }
                     }
 //                    fileHandler.writeAllCustomers(custs);
                     break;
                 case 3:
+                    manager.setRegularQueue(Order.regular);
+                    manager.setVipQueue(Order.vipqueue);
+                    manager.setCusts(Customer.customers);
+                    manager.setDenied(Order.denied);
+                    manager.setOutfordelivery(Order.outfordelivery);
+                    manager.setOrderHistory(Order.OrderHistory);
+                    manager.setPreparing(Order.preparing);
+                    manager.setCnt(Order.count);
+
+                    fileHandler.saveOrderManager("orders.dat",manager);
                     System.out.println("Sad to see you leaaveeeee :/");
                     exit = true;
+                    System.exit(0);
                     break;
                 case 4:
 //                    fileHandler.writeAllOrders("orders.dat",Order.vipqueue,Order.regular);
                     SwingUtilities.invokeLater(() -> {
                         MenuGUI gui = new MenuGUI();
+
                         gui.setVisible(true);
                     });
                     break;
@@ -367,12 +399,12 @@ public class Main{
 //        sc.close();
     }
 
-    public static void InitCustomer(Admin admin) {
+    public static void InitCustomer(Admin admin, OrderManager manager) {
         //john is a regular customer who has placed an order and has some things in his cart
-        Customer John = new Customer("john", "505 boys hostel",false);
+        Customer John = new Customer("john", "505 boys hostel",false, manager);
         John.AddToCartInternal(i0,5);
         float amount = i0.getPrice()*5;
-        Order j1 = new Order(John.getCart(),false, John);
+        Order j1 = new Order(John.getCart(),false, John, manager);
         John.getAccount().getFrom().add(admin);
         John.getAccount().getCredit().add(-amount);
         admin.adminAcc.changebalance(amount);
@@ -383,10 +415,10 @@ public class Main{
         John.AddToCartInternal(i0.Menu.get(1),3);
 
         //emma is a vip customer who has placed an order currently empty cart
-        Customer emma = new Customer("emma", "505 gh",true);
+        Customer emma = new Customer("emma", "505 gh",true, manager);
         emma.AddToCartInternal(i0.Menu.get(3),2);
         amount = FoodItem.Menu.get(3).getPrice()*2;
-        Order e1 = new Order(emma.getCart(),true, emma);
+        Order e1 = new Order(emma.getCart(),true, emma, manager);
         emma.getAccount().getFrom().add(admin);
         emma.getAccount().getCredit().add(-amount);
         admin.adminAcc.changebalance(amount);
@@ -394,7 +426,7 @@ public class Main{
         admin.adminAcc.getCredit().add(amount);
 
         //harry regular, only items in cart no prev orders
-        Customer harry = new Customer("harry", "ur place", false);
+        Customer harry = new Customer("harry", "ur place", false, manager);
         harry.AddToCartInternal(i0.Menu.get(2),1);
 
     }

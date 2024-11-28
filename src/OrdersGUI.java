@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.TreeSet;
 
@@ -36,7 +37,9 @@ public class OrdersGUI extends JFrame {
 
     public void refreshOrders() {
         ordersModel.setRowCount(0);
-        Queue<Order> orders1= fileHandler.readOrdersFromFile("orders.dat");
+        Queue<Order> orders1= new LinkedList<>();
+        orders1.addAll(Order.vipqueue);
+        orders1.addAll(Order.regular);
         if(orders1==null){
             System.out.println("No order history found");
             return;

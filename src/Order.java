@@ -16,7 +16,7 @@ public class Order implements Serializable {
     private float total;
     private int id =0;
     //food item and specified qty
-    private static int count =0;
+    static int count =0;
     private String specialreq = "";
 
 
@@ -50,14 +50,16 @@ public class Order implements Serializable {
         this.specialreq= req;
     }
 
-    public Order(HashMap<FoodItem, Integer> Cart, boolean vip, Customer c){
+    public Order(HashMap<FoodItem, Integer> Cart, boolean vip, Customer c, OrderManager manager){
         this.cart = Cart;
         this.VIP = vip;
         if(vip){
             vipqueue.add(this);
+//            manager.addToVipQueue(this);
         }
         else{
             regular.add(this);
+//            manager.addToRegularQueue(this);
         }
         this.status = 0; //by default when order entered
         this.date = LocalDate.now();
@@ -72,6 +74,9 @@ public class Order implements Serializable {
     public static void ViewOrders(){
         //pending orders
         //printed in order of priority
+//        Queue<Order> vipqueue = manager.getVipQueue();
+//        Queue<Order> regular = manager.getRegularQueue();
+
         System.out.println("-----------Orders Pending (in order of Priority)--------");
         System.out.println("Printing Next order to be handled..");
         Order next;
@@ -183,6 +188,7 @@ public class Order implements Serializable {
             Order p = outfordelivery.poll();
             p.setStatus(3);
             OrderHistory.add(p);
+            o.getCustomer().getHistory().add(p);
             System.out.println("Order no. "+p.getId()+"Has been completed, received by customer and moved to Order History Queue!");
         }
         else{
